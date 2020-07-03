@@ -93,9 +93,7 @@ public class AnvilGUI {
 	 */
 	@Deprecated
 	public AnvilGUI(Plugin plugin, Player holder, String insert, BiFunction<Player, String, String> biFunction) {
-		this(plugin, holder, "Repair & Name", insert, null, false, null, (player, text) -> {
-			return biFunction.apply(player, text);
-		});
+		this(plugin, holder, "Repair & Name", insert, null, false, null, biFunction::apply);
 	}
 
 	/**
@@ -213,7 +211,7 @@ public class AnvilGUI {
 					final String response = completeFunction.apply(clicker, clicked.hasItemMeta() ? clicked.getItemMeta().getDisplayName() : "");
 					if(response != null) {
 						final ItemMeta meta = clicked.getItemMeta();
-						meta.setDisplayName(response.getText());
+						meta.setDisplayName(response);
 						clicked.setItemMeta(meta);
 						inventory.setItem(Slot.INPUT_LEFT, clicked);
 					} else {
