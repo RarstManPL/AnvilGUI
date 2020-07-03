@@ -295,7 +295,6 @@ public class AnvilGUI {
 		 * @throws IllegalArgumentException when the closeListener is null
 		 */
 		public Builder onClose(Consumer<Player> closeListener) {
-			Validate.notNull(closeListener, "closeListener cannot be null");
 			this.closeListener = closeListener;
 			return this;
 		}
@@ -331,7 +330,7 @@ public class AnvilGUI {
 		 * @throws IllegalArgumentException if the text is null
 		 */
 		public Builder text(String text) {
-			Validate.notNull(text, "Text cannot be null");
+			Validate.notNull(plugin, "Text cannot be null");
 			this.itemText = text;
 			return this;
 		}
@@ -343,7 +342,7 @@ public class AnvilGUI {
 		 * @throws IllegalArgumentException if the title is null
 		 */
 		public Builder title(String title) {
-			Validate.notNull(title, "title cannot be null");
+			Validate.notNull(plugin, "Title cannot be null");
 			this.title = title;
 			return this;
 		}
@@ -355,7 +354,6 @@ public class AnvilGUI {
 		 * @throws IllegalArgumentException if the {@link ItemStack} is null
 		 */
 		public Builder item(ItemStack item) {
-			Validate.notNull(item, "item cannot be null");
 			this.item = item;
 			return this;
 		}
