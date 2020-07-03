@@ -21,10 +21,6 @@ public class VersionMatcher {
 	 * All available {@link VersionWrapper}s
 	 */
 	private final List<Class<? extends VersionWrapper>> versions = Arrays.asList(
-			Wrapper1_12_R1.class,
-			Wrapper1_13_R1.class,
-			Wrapper1_13_R2.class,
-			Wrapper1_14_R1.class,
 			Wrapper1_15_R1.class,
 			Wrapper1_16_R1.class
 	);
