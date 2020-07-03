@@ -61,7 +61,7 @@ public class AnvilGUI {
 	/**
 	 * An {@link BiFunction} that is called when the {@link Slot#OUTPUT} slot has been clicked
 	 */
-	private final BiFunction<Player, String, Response> completeFunction;
+	private final BiFunction<Player, String, String> completeFunction;
 
 	/**
 	 * The container id of the inventory, used for NMS methods
@@ -94,12 +94,7 @@ public class AnvilGUI {
 	@Deprecated
 	public AnvilGUI(Plugin plugin, Player holder, String insert, BiFunction<Player, String, String> biFunction) {
 		this(plugin, holder, "Repair & Name", insert, null, false, null, (player, text) -> {
-			String response = biFunction.apply(player, text);
-			if(response != null) {
-				return Response.text(response);
-			} else {
-				return Response.close();
-			}
+			return biFunction.apply(player, text);
 		});
 	}
 
@@ -123,7 +118,7 @@ public class AnvilGUI {
 			ItemStack insert,
 			boolean preventClose,
 			Consumer<Player> closeListener,
-			BiFunction<Player, String, Response> completeFunction
+			BiFunction<Player, String, String> completeFunction
 	) {
 		this.plugin = plugin;
 		this.player = player;
@@ -215,8 +210,8 @@ public class AnvilGUI {
 					final ItemStack clicked = inventory.getItem(Slot.OUTPUT);
 					if (clicked == null || clicked.getType() == Material.AIR) return;
 
-					final Response response = completeFunction.apply(clicker, clicked.hasItemMeta() ? clicked.getItemMeta().getDisplayName() : "");
-					if(response.getText() != null) {
+					final String response = completeFunction.apply(clicker, clicked.hasItemMeta() ? clicked.getItemMeta().getDisplayName() : "");
+					if(response != null) {
 						final ItemMeta meta = clicked.getItemMeta();
 						meta.setDisplayName(response.getText());
 						clicked.setItemMeta(meta);
@@ -268,7 +263,7 @@ public class AnvilGUI {
 		/**
 		 * An {@link BiFunction} that is called when the anvil output slot has been clicked
 		 */
-		private BiFunction<Player, String, Response> completeFunction;
+		private BiFunction<Player, String, String> completeFunction;
 		/**
 		 * The {@link Plugin} that this anvil GUI is associated with
 		 */
@@ -313,7 +308,7 @@ public class AnvilGUI {
 		 * @return The {@link Builder} instance
 		 * @throws IllegalArgumentException when the completeFunction is null
 		 */
-		public Builder onComplete(BiFunction<Player, String, Response> completeFunction) {
+		public Builder onComplete(BiFunction<Player, String, String> completeFunction) {
 			Validate.notNull(completeFunction, "Complete function cannot be null");
 			this.completeFunction = completeFunction;
 			return this;
@@ -378,51 +373,6 @@ public class AnvilGUI {
 			Validate.notNull(completeFunction, "Complete function cannot be null");
 			Validate.notNull(player, "Player cannot be null");
 			return new AnvilGUI(plugin, player, title, itemText, item, preventClose, closeListener, completeFunction);
-		}
-
-	}
-
-	/**
-	 * Represents a response when the player clicks the output item in the anvil GUI
-	 */
-	public static class Response {
-
-		/**
-		 * The text that is to be displayed to the user
-		 */
-		private final String text;
-
-		/**
-		 * Creates a response to the user's input
-		 * @param text The text that is to be displayed to the user, which can be null to close the inventory
-		 */
-		private Response(String text) {
-			this.text = text;
-		}
-
-		/**
-		 * Gets the text that is to be displayed to the user
-		 * @return The text that is to be displayed to the user
-		 */
-		public String getText() {
-			return text;
-		}
-
-		/**
-		 * Returns an {@link Response} object for when the anvil GUI is to close
-		 * @return An {@link Response} object for when the anvil GUI is to close
-		 */
-		public static Response close() {
-			return new Response(null);
-		}
-
-		/**
-		 * Returns an {@link Response} object for when the anvil GUI is to display text to the user
-		 * @param text The text that is to be displayed to the user
-		 * @return An {@link Response} object for when the anvil GUI is to display text to the user
-		 */
-		public static Response text(String text) {
-			return new Response(text);
 		}
 
 	}
