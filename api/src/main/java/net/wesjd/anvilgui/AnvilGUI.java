@@ -49,7 +49,7 @@ public class AnvilGUI {
 	/**
 	 * The ItemStack that is in the {@link Slot#INPUT_LEFT} slot.
 	 */
-	private ItemStack insert;
+	private Map<Integer, ItemStack> = new HashMap<>();
 	/**
 	 * A state that decides where the anvil GUI is able to be closed by the user
 	 */
@@ -57,7 +57,7 @@ public class AnvilGUI {
 	/**
 	 * An {@link Consumer} that is called when the anvil GUI is closed
 	 */
-	private final Consumer<Player> closeListener;
+	private final Consumer<InventoryCloseEvent> closeListener;
 	/**
 	 * An {@link BiFunction} that is called when the {@link Slot#OUTPUT} slot has been clicked
 	 */
@@ -93,7 +93,7 @@ public class AnvilGUI {
 	 */
 	@Deprecated
 	public AnvilGUI(Plugin plugin, Player holder, String insert, BiFunction<Player, String, String> biFunction) {
-		this(plugin, holder, "Repair & Name", insert, null, false, null, biFunction::apply);
+		this(plugin, holder, "Repair & Name", insert, new HashMap<>, false, null, biFunction::apply);
 	}
 
 	/**
@@ -113,27 +113,27 @@ public class AnvilGUI {
 			Player player,
 			String inventoryTitle,
 			String itemText,
-			ItemStack insert,
+			Map<Integer, ItemStack> items,
 			boolean preventClose,
-			Consumer<Player> closeListener,
+			Consumer<InventoryCloseEvent> closeListener,
 			BiFunction<Player, String, String> completeFunction
 	) {
 		this.plugin = plugin;
 		this.player = player;
 		this.inventoryTitle = inventoryTitle;
-		this.insert = insert;
+		this.items = items;
 		this.preventClose = preventClose;
 		this.closeListener = closeListener;
 		this.completeFunction = completeFunction;
 
 		if(itemText != null) {
-			if(insert == null) {
-				this.insert = new ItemStack(Material.PAPER);
+			if(items.get(2) == null) {
+				this.items.put(2, new ItemStack(Material.PAPER);
 			}
 
-			ItemMeta paperMeta = this.insert.getItemMeta();
+			ItemMeta paperMeta = this.items.get(2).getItemMeta();
 			paperMeta.setDisplayName(itemText);
-			this.insert.setItemMeta(paperMeta);
+			this.items.get(2).setItemMeta(paperMeta);
 		}
 
 		openInventory();
@@ -151,7 +151,10 @@ public class AnvilGUI {
 		final Object container = WRAPPER.newContainerAnvil(player, inventoryTitle);
 
 		inventory = WRAPPER.toBukkitInventory(container);
-		inventory.setItem(Slot.INPUT_LEFT, this.insert);
+		for(int i = 0; i < 2; i++) {
+			if(!this.items.containsKey(i)){
+				continue;
+			inventory.setItem(i, this.items.get(i));
 
 		containerId = WRAPPER.getNextContainerId(player, container);
 		WRAPPER.sendPacketOpenWindow(player, containerId, inventoryTitle);
@@ -176,10 +179,6 @@ public class AnvilGUI {
 		WRAPPER.sendPacketCloseWindow(player, containerId);
 
 		HandlerList.unregisterAll(listener);
-
-		if(closeListener != null) {
-			closeListener.accept(player);
-		}
 	}
 
 	/**
@@ -237,6 +236,9 @@ public class AnvilGUI {
 		public void onInventoryClose(InventoryCloseEvent event) {
 			if (open && event.getInventory().equals(inventory)) {
 				closeInventory();
+				if(closeListener != null) {
+					closeListener.accept(event);
+				}
 				if(preventClose) {
 					Bukkit.getScheduler().runTask(plugin, AnvilGUI.this::openInventory);
 				}
@@ -249,11 +251,13 @@ public class AnvilGUI {
 	 * A builder class for an {@link AnvilGUI} object
 	 */
 	public static class Builder {
+		
+		private final Map<Integer, ItemStack> items = new HashMap<>();
 
 		/**
 		 * An {@link Consumer} that is called when the anvil GUI is closed
 		 */
-		private Consumer<Player> closeListener;
+		private Consumer<InventoryCloseEvent> closeListener;
 		/**
 		 * A state that decides where the anvil GUI is able to be closed by the user
 		 */
@@ -274,10 +278,6 @@ public class AnvilGUI {
 		 * The starting text on the item
 		 */
 		private String itemText = "";
-		/**
-		 * An {@link ItemStack} to be put in the input slot
-		 */
-		private ItemStack item;
 
 		/**
 		 * Prevents the closing of the anvil GUI by the user
@@ -294,8 +294,10 @@ public class AnvilGUI {
 		 * @return The {@link Builder} instance
 		 * @throws IllegalArgumentException when the closeListener is null
 		 */
-		public Builder onClose(Consumer<Player> closeListener) {
-			this.closeListener = closeListener;
+		public Builder onClose(Consumer<InventoryCloseEvent> closeListener) {
+			if(closeListener != null) {
+				this.closeListener = closeListener;
+			}
 			return this;
 		}
 
@@ -330,8 +332,9 @@ public class AnvilGUI {
 		 * @throws IllegalArgumentException if the text is null
 		 */
 		public Builder text(String text) {
-			Validate.notNull(plugin, "Text cannot be null");
-			this.itemText = text;
+			if(text != null) {
+				this.itemText = text;
+			}
 			return this;
 		}
 
@@ -342,21 +345,17 @@ public class AnvilGUI {
 		 * @throws IllegalArgumentException if the title is null
 		 */
 		public Builder title(String title) {
-			Validate.notNull(plugin, "Title cannot be null");
-			this.title = title;
+			if(title != null) {
+				this.title = title;
+			}
 			return this;
 		}
 
-		/**
-		 * Sets the {@link ItemStack} to be put in the first slot
-		 * @param item The {@link ItemStack} to be put in the first slot
-		 * @return The {@link Builder} instance
-		 * @throws IllegalArgumentException if the {@link ItemStack} is null
-		 */
-		public Builder item(ItemStack item) {
-			this.item = item;
-			return this;
-		}
+
+		public Builder setItem(final int slot, final ItemStack item) {
+			Validate.notNull(slot, "Slot cannot be null");
+			Validate.notNull(item, "Item cannot be null");
+			this.items.put(slot, item);
 
 		/**
 		 * Creates the anvil GUI and opens it for the player
@@ -368,7 +367,7 @@ public class AnvilGUI {
 			Validate.notNull(plugin, "Plugin cannot be null");
 			Validate.notNull(completeFunction, "Complete function cannot be null");
 			Validate.notNull(player, "Player cannot be null");
-			return new AnvilGUI(plugin, player, title, itemText, item, preventClose, closeListener, completeFunction);
+			return new AnvilGUI(plugin, player, title, itemText, items, preventClose, closeListener, completeFunction);
 		}
 
 	}
