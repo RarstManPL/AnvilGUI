@@ -407,5 +407,5 @@ public class AnvilGUI {
 			return values;
 		}
 	}
-
+	
 }
