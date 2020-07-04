@@ -129,11 +129,11 @@ public class AnvilGUI {
         this.completeFunction = completeFunction;
 
         if(itemText != null) {
-            if(items.get(2) == null) {
-                this.items.put(2, new ItemStack(Material.PAPER));
+            if(!items.containsKey(0)) {
+                this.items.put(0, new ItemStack(Material.PAPER));
             }
 
-            ItemMeta paperMeta = this.items.get(2).getItemMeta();
+            ItemMeta paperMeta = this.items.get(0).getItemMeta();
             paperMeta.setDisplayName(itemText);
             this.items.get(2).setItemMeta(paperMeta);
         }
