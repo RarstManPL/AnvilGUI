@@ -135,7 +135,7 @@ public class AnvilGUI {
 
             ItemMeta paperMeta = this.items.get(0).getItemMeta();
             paperMeta.setDisplayName(itemText);
-            this.items.get(2).setItemMeta(paperMeta);
+            this.items.get(0).setItemMeta(paperMeta);
         }
 
         openInventory();
